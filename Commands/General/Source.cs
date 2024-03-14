@@ -14,7 +14,7 @@ namespace VPBot.Commands.General
             {
                 Color = new DiscordColor("#0070FF"),
                 Description = "# Source\n" +
-                "Discord Bot: *https://github.com/Brawlboxgaming/Variety-Pack-Bot*\n" +
+                "Discord Bot: *https://github.com/Brawlboxgaming/VPBot*\n" +
                 "Variety Pack Source: *https://github.com/Brawlboxgaming/Variety-Pack*\n" +
                 "Pulsar Fork: *https://github.com/Brawlboxgaming/Pulsar*",
                 Footer = new DiscordEmbedBuilder.EmbedFooter

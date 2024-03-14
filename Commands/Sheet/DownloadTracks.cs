@@ -12,13 +12,13 @@ using HtmlAgilityPack;
 
 namespace VPBot.Commands.Sheet
 {
-    public class DownloadOutdated : ApplicationCommandModule
+    public class DownloadTracks : ApplicationCommandModule
     {
-        [SlashCommand("downloadoutdated", "Downloads tracks listed on the spreadsheet that are out of date.")]
-        public async Task DownloadOutdatedCommand(InteractionContext ctx,
+        [SlashCommand("downloadtracks", "Downloads tracks listed on the spreadsheet (outdated by default).")]
+        public async Task DownloadTracksCommand(InteractionContext ctx,
             [Choice("True", "true")]
             [Choice("False", "false")]
-            [Option("new-tracks", "Only downloads tracks that are out-of-date")] string newTracks = "false")
+            [Option("new-tracks", "Only downloads tracks that are out-of-date")] string newTracks = "true")
         {
             try
             {
@@ -44,9 +44,9 @@ namespace VPBot.Commands.Sheet
 
                 for (int i = 1; i < response.Values.Count; i++)
                 {
-                    object link = response.Values[i][1];
+                    object link = response.Values[i][Util.SheetColumn.Link];
 
-                    if (allTracks || response.Values[i][5].ToString() == "MAY NEED UPDATE")
+                    if (allTracks || response.Values[i][Util.SheetColumn.UpdateStatus].ToString() == "MAY NEED UPDATE")
                     {
                         HtmlWeb htmlWeb = new HtmlWeb()
                         {
@@ -62,14 +62,14 @@ namespace VPBot.Commands.Sheet
                                 string html = webClient.DownloadString(node.InnerHtml.Split('"')[5]);
                                 HtmlDocument wiimmDoc = new HtmlDocument();
                                 wiimmDoc.LoadHtml(html);
-                                var trackNameVer = response.Values[i][0].ToString().Split('(')[0].Trim() + $" {response.Values[i][4]}";
+                                var trackNameVer = response.Values[i][Util.SheetColumn.Name].ToString().Split('(')[0].Trim() + $" {response.Values[i][Util.SheetColumn.PackVer]}";
                                 var wiimmNodes = wiimmDoc.DocumentNode.SelectNodes("//tr/td");
                                 for (int j = 0; j < wiimmNodes.Count; j++)
                                 {
                                     if (wiimmNodes[j].InnerText.Contains(trackNameVer))
                                     {
                                         var id = wiimmNodes[j - 7].InnerText;
-                                        webClient.DownloadFile($"https://ct.wiimm.de/dl/@myLhAVA9/{id}", $"tracks/{response.Values[i][0].ToString().Split('(')[0].Trim()}.wbz");
+                                        webClient.DownloadFile($"https://ct.wiimm.de/dl/@myLhAVA9/{id}", $"tracks/{response.Values[i][Util.SheetColumn.Name].ToString().Split('(')[0].Trim()}.wbz");
                                         dls++;
                                         if (dls % 30 == 0)
                                         {
@@ -94,7 +94,7 @@ namespace VPBot.Commands.Sheet
                 {
                     Color = new DiscordColor("#0070FF"),
                     Title = "__**Success:**__",
-                    Description = $"*https://files.brawlbox.co.uk/VPTesting/Tracks.zip*",
+                    Description = "*https://files.brawlbox.co.uk/VPTesting/Tracks.zip*",
                     Footer = new DiscordEmbedBuilder.EmbedFooter
                     {
                         Text = $"Server Time: {DateTime.Now}"
@@ -107,7 +107,7 @@ namespace VPBot.Commands.Sheet
                 var embed = new DiscordEmbedBuilder
                 {
                     Color = new DiscordColor("#0070FF"),
-                                        Description = "# Error" + ex.Message,
+                                        Description = "# Error\n" + ex.Message,
                     Footer = new DiscordEmbedBuilder.EmbedFooter
                     {
                         Text = $"Server Time: {DateTime.Now}"

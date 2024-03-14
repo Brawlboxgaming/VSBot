@@ -19,7 +19,7 @@ namespace VPBot.Main
             Bot.SlashCommands.RegisterCommands<Update>();
 
             //Sheet
-            Bot.SlashCommands.RegisterCommands<DownloadOutdated>();
+            Bot.SlashCommands.RegisterCommands<DownloadTracks>();
 #if DEBUG
             //Bot.SlashCommands.RegisterCommands<Testing>();
 #endif
