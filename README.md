@@ -3,8 +3,8 @@
 ## Current List of Commands
 
 ### Standard Commands
-/help
+* /help
 
 ### Admin Commands
-/update
-/downloadoutdated
+* /update
+* /downloadoutdated
