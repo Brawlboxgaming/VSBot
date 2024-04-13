@@ -8,6 +8,7 @@ using Google.Apis.Auth.OAuth2;
 using Google.Apis.Services;
 using Google.Apis.Sheets.v4;
 using HtmlAgilityPack;
+using VPBot.Classes;
 
 namespace VPBot.Commands.Scheduling
 {
@@ -23,7 +24,7 @@ namespace VPBot.Commands.Scheduling
             {
                 Color = new DiscordColor("#0070FF"),
                 Description = "# Notice\n" +
-                "Sheet has been updated.",
+                    "Sheet has been updated.",
                 Footer = new DiscordEmbedBuilder.EmbedFooter
                 {
                     Text = $"Server Time: {DateTime.Now}"
@@ -125,15 +126,7 @@ namespace VPBot.Commands.Scheduling
 
                 if (description != "__**Tracks Have Been Updated:**__\n")
                 {
-                    DiscordChannel channel = ctx.Channel;
-
-                    foreach (var c in ctx.Guild.Channels)
-                    {
-                        if (c.Value.Id == 1094364785950339112)
-                        {
-                            channel = c.Value;
-                        }
-                    }
+                    DiscordChannel channel = Bot.Client.GetGuildAsync(GuildID.VP).Result.GetChannel(ChannelID.BOTLOG);
 
                     var embed = new DiscordEmbedBuilder
                     {
@@ -144,7 +137,7 @@ namespace VPBot.Commands.Scheduling
                             Text = $"Server Time: {DateTime.Now}"
                         }
                     };
-                    await channel.SendMessageAsync(embed);
+                    await channel.SendMessageAsync(new DiscordMessageBuilder().WithContent("<@105742694730457088>").AddEmbed(embed));
                 }
 
                 var today = DateTime.Now;
@@ -159,7 +152,7 @@ namespace VPBot.Commands.Scheduling
                 var embed = new DiscordEmbedBuilder
                 {
                     Color = new DiscordColor("#0070FF"),
-                    Description = "# Error\n" + ex.Message,
+                    Description = "# Error\n" + ex,
                     Footer = new DiscordEmbedBuilder.EmbedFooter
                     {
                         Text = $"Server Time: {DateTime.Now}"

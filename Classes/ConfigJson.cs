@@ -1,6 +1,6 @@
 ﻿using Newtonsoft.Json;
 
-namespace VPBot.Class
+namespace VPBot.Classes
 {
     public class ConfigJson
     {

@@ -107,7 +107,7 @@ namespace VPBot.Commands.Sheet
                 var embed = new DiscordEmbedBuilder
                 {
                     Color = new DiscordColor("#0070FF"),
-                                        Description = "# Error\n" + ex.Message,
+                    Description = "# Error\n" + ex,
                     Footer = new DiscordEmbedBuilder.EmbedFooter
                     {
                         Text = $"Server Time: {DateTime.Now}"

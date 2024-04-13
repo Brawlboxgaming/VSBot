@@ -8,7 +8,7 @@ using DSharpPlus.Interactivity.Extensions;
 using DSharpPlus.SlashCommands;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
-using VPBot.Class;
+using VPBot.Classes;
 using VPBot.Main;
 
 namespace VPBot
@@ -35,7 +35,8 @@ namespace VPBot
                 Token = configJson.Token,
                 TokenType = TokenType.Bot,
                 AutoReconnect = true,
-                MinimumLogLevel = LogLevel.Debug
+                MinimumLogLevel = LogLevel.Debug,
+                Intents = DiscordIntents.All
             };
 
             Client = new DiscordClient(config);
@@ -65,6 +66,8 @@ namespace VPBot
             await interactions.AssignAllInteractions();
 
             await Client.ConnectAsync();
+
+            await ScheduledTasks.StartTimers();
 
             await Task.Delay(-1);
         }
