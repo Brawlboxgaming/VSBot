@@ -261,13 +261,8 @@ namespace VPBot
                 }
 
                 DiscordChannel channel = await Bot.Client.GetGuildAsync(GuildID.VP).Result.GetChannelAsync(ChannelID.SUBMISSION_APPROVAL);
-                DiscordRole teamRole = Bot.Client.GetGuildAsync(GuildID.VP).Result.GetRole(RoleID.VP_TEAM);
 
                 await channel.SendMessageAsync(new DiscordMessageBuilder()
-#if DEBUG == false
-                    .WithAllowedMention(new RoleMention(teamRole))
-#endif
-                    .WithContent(teamRole.Mention)
                     .AddEmbed(
                     new DiscordEmbedBuilder
                     {
