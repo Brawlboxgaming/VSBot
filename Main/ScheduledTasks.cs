@@ -1,13 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using DSharpPlus.Entities;
-using DSharpPlus;
-using DSharpPlus.SlashCommands;
-using DSharpPlus.SlashCommands.Attributes;
-using FluentScheduler;
+﻿using FluentScheduler;
 using VPBot.Commands;
 using VPBot.Commands.Scheduling;
 
@@ -31,6 +22,7 @@ namespace VPBot.Main
             try
             {
                 await Update.UpdateSheet(null);
+                await CheckTrackSubmissions.CheckTrackPolls(null);
             }
             catch (Exception ex)
             {

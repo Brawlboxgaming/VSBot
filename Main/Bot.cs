@@ -1,11 +1,16 @@
 ﻿using System.Text;
 using DSharpPlus;
+using DSharpPlus.Commands;
+using DSharpPlus.Commands.EventArgs;
 using DSharpPlus.CommandsNext;
+using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
 using DSharpPlus.Interactivity;
 using DSharpPlus.Interactivity.Enums;
 using DSharpPlus.Interactivity.Extensions;
+using DSharpPlus.Net;
 using DSharpPlus.SlashCommands;
+using DSharpPlus.SlashCommands.Attributes;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using VPBot.Classes;
@@ -15,10 +20,10 @@ namespace VPBot
 {
     public class Bot
     {
-        public Interactions interactions = new();
         public Events events = new();
         public static DiscordClient Client { get; private set; }
-        public static SlashCommandsExtension SlashCommands { get; private set; }
+        public static DiscordClientBuilder Builder { get; private set; }
+        public static CommandsExtension Commands { get; private set; }
 
         public async Task RunAsync()
         {
@@ -30,51 +35,59 @@ namespace VPBot
 
             ConfigJson configJson = JsonConvert.DeserializeObject<ConfigJson>(json);
 
-            DiscordConfiguration config = new()
-            {
-                Token = configJson.Token,
-                TokenType = TokenType.Bot,
-                AutoReconnect = true,
-                MinimumLogLevel = LogLevel.Debug,
-                Intents = DiscordIntents.All
-            };
-
-            Client = new DiscordClient(config);
-
-            Client.Ready += OnClientReady;
-
-            Client.UseInteractivity(new InteractivityConfiguration
-            {
-                PollBehaviour = PollBehaviour.KeepEmojis,
-                AckPaginationButtons = true,
-                Timeout = TimeSpan.FromSeconds(60)
-            });
-
-            CommandsNextConfiguration commandsConfig = new()
-            {
-                EnableDms = false,
-                EnableDefaultHelp = false,
-                DmHelp = true
-            };
-
-            SlashCommands = Client.UseSlashCommands();
-
-            RegisterCommands.RegisterAllCommands();
+            Builder = DiscordClientBuilder.CreateDefault(configJson.Token, DiscordIntents.All).SetLogLevel(LogLevel.Debug);
 
             await events.AssignAllEvents();
 
-            await interactions.AssignAllInteractions();
+            Client = Builder.Build();
 
-            await Client.ConnectAsync();
+            Commands = Client.UseCommands(new CommandsConfiguration
+            {
+                UseDefaultCommandErrorHandler = false
+            });
+
+            Commands.CommandErrored += CommandErrorHandler;
+
+            RegisterCommands.RegisterAllCommands();
+
+            DiscordActivity status = new("Variety Pack", DiscordActivityType.Playing);
+
+            await Client.ConnectAsync(status, DiscordUserStatus.Online);
 
             await ScheduledTasks.StartTimers();
 
             await Task.Delay(-1);
         }
-
-        private Task OnClientReady(DiscordClient sender, ReadyEventArgs e)
+        private async Task CommandErrorHandler(CommandsExtension s, CommandErroredEventArgs e)
         {
-            return Task.CompletedTask;
+            Bot.Commands.CommandErrored += async (s, e) =>
+            {
+                if (e.Exception is SlashExecutionChecksFailedException slex)
+                {
+                    foreach (SlashCheckBaseAttribute check in slex.FailedChecks)
+                    {
+                        if (check is SlashRequireUserPermissionsAttribute rqu)
+                        {
+                            await e.Context.RespondAsync(new DiscordInteractionResponseBuilder() { Content = $"Only members with {rqu.Permissions} can run this command!", IsEphemeral = true });
+                        }
+                        else if (check is SlashRequireOwnerAttribute rqo)
+                        {
+                            await e.Context.RespondAsync(new DiscordInteractionResponseBuilder() { Content = $"Only the owner <@105742694730457088> can run this command!", IsEphemeral = true });
+                        }
+                        else
+                        {
+                            await e.Context.RespondAsync(new DiscordInteractionResponseBuilder() { Content = "An internal error has occured. Please report this to <@105742694730457088> with details of the error.", IsEphemeral = false });
+                        }
+                    }
+                }
+                else
+                {
+                    Console.WriteLine(e.Exception);
+                }
+                await Task.CompletedTask;
+            };
+
+            await Task.CompletedTask;
         }
     }
 }

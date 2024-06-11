@@ -1,8 +1,11 @@
-﻿using System.IO.Compression;
+﻿using System.ComponentModel;
+using System.IO.Compression;
 using System.Net;
 using System.Security.Cryptography.X509Certificates;
 using System.Xml;
 using DSharpPlus;
+using DSharpPlus.Commands;
+using DSharpPlus.Commands.Processors.SlashCommands;
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
 using Google.Apis.Auth.OAuth2;
@@ -12,17 +15,25 @@ using HtmlAgilityPack;
 
 namespace VPBot.Commands.Sheet
 {
-    public class DownloadTracks : ApplicationCommandModule
+    public class DownloadTracks
     {
-        [SlashCommand("downloadtracks", "Downloads tracks listed on the spreadsheet (outdated by default).")]
-        public async Task DownloadTracksCommand(InteractionContext ctx,
+        [Command("downloadtracks")]
+        [Description("Downloads tracks listed on the spreadsheet (outdated by default).")]
+        public async Task DownloadTracksCommand(CommandContext ctx,
             [Choice("True", "true")]
             [Choice("False", "false")]
             [Option("new-tracks", "Only downloads tracks that are out-of-date")] string newTracks = "true")
         {
             try
             {
-                await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder() { IsEphemeral = Util.CheckEphemeral(ctx) });
+                if (ctx is SlashCommandContext sCtx)
+                {
+                    await sCtx.DeferResponseAsync(Util.CheckEphemeral(ctx));
+                }
+                else
+                {
+                    await ctx.DeferResponseAsync();
+                }
                 bool allTracks = newTracks == "true" ? false : true;
 
                 string serviceAccountEmail = "sheetbox@sonic-fiber-399810.iam.gserviceaccount.com";
@@ -93,14 +104,14 @@ namespace VPBot.Commands.Sheet
                 var embed = new DiscordEmbedBuilder
                 {
                     Color = new DiscordColor("#0070FF"),
-                    Title = "__**Success:**__",
-                    Description = "*https://files.brawlbox.co.uk/VPTesting/Tracks.zip*",
+                    Description = "# Success\n" +
+                    "*https://files.brawlbox.co.uk/VPTesting/Tracks.zip*",
                     Footer = new DiscordEmbedBuilder.EmbedFooter
                     {
                         Text = $"Server Time: {DateTime.Now}"
                     }
                 };
-                await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(embed));
+                await ctx.EditResponseAsync(new DiscordInteractionResponseBuilder().AddEmbed(embed));
             }
             catch (Exception ex)
             {

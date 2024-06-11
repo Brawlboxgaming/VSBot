@@ -1,15 +1,26 @@
 ﻿using DSharpPlus;
+using DSharpPlus.Commands;
+using DSharpPlus.Commands.Processors.SlashCommands;
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
+using System.ComponentModel;
 
 namespace VPBot.Commands.General
 {
-    public class Source : ApplicationCommandModule
+    public class Source
     {
-        [SlashCommand("source", "Displays the source of Variety Pack related code.")]
-        public async Task SourceCommand(InteractionContext ctx)
+        [Command("source")]
+        [Description("Displays the source of Variety Pack related code.")]
+        public async Task SourceCommand(CommandContext ctx)
         {
-            await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder() { IsEphemeral = Util.CheckEphemeral(ctx) });
+            if (ctx is SlashCommandContext sCtx)
+            {
+                await sCtx.DeferResponseAsync(Util.CheckEphemeral(ctx));
+            }
+            else
+            {
+                await ctx.DeferResponseAsync();
+            }
             var embed = new DiscordEmbedBuilder
             {
                 Color = new DiscordColor("#0070FF"),
@@ -23,7 +34,7 @@ namespace VPBot.Commands.General
                 }
             };
 
-            await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(embed));
+            await ctx.EditResponseAsync(new DiscordInteractionResponseBuilder().AddEmbed(embed));
         }
     }
 }

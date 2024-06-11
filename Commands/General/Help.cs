@@ -1,15 +1,26 @@
 ﻿using DSharpPlus;
+using DSharpPlus.Commands;
+using DSharpPlus.Commands.Processors.SlashCommands;
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
+using System.ComponentModel;
 
 namespace VPBot.Commands.General
 {
-    public class Help : ApplicationCommandModule
+    public class Help
     {
-        [SlashCommand("help", "Displays a list of commands.")]
-        public async Task HelpCommand(InteractionContext ctx)
+        [Command("help")]
+        [Description("Displays a list of commands.")]
+        public async Task HelpCommand(CommandContext ctx)
         {
-            await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder() { IsEphemeral = Util.CheckEphemeral(ctx) });
+            if (ctx is SlashCommandContext sCtx)
+            {
+                await sCtx.DeferResponseAsync(Util.CheckEphemeral(ctx));
+            }
+            else
+            {
+                await ctx.DeferResponseAsync();
+            }
             string description = "# Help\n" +
                 "### Standard Commands\n" +
                 "/help";
@@ -36,7 +47,7 @@ namespace VPBot.Commands.General
                 }
             };
 
-            await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(embed));
+            await ctx.EditResponseAsync(new DiscordInteractionResponseBuilder().AddEmbed(embed));
         }
     }
 }

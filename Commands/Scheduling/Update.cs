@@ -1,6 +1,10 @@
-﻿using System.Net;
+﻿using System.ComponentModel;
+using System.Net;
 using System.Security.Cryptography.X509Certificates;
 using DSharpPlus;
+using DSharpPlus.Commands;
+using DSharpPlus.Commands.ContextChecks;
+using DSharpPlus.Commands.Processors.SlashCommands;
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
 using DSharpPlus.SlashCommands.Attributes;
@@ -12,13 +16,21 @@ using VPBot.Classes;
 
 namespace VPBot.Commands.Scheduling
 {
-    public class Update : ApplicationCommandModule
+    public class Update
     {
-        [SlashCommand("update", "Updates the track update information on the sheet")]
-        [SlashRequireOwner]
-        public static async Task UpdateSheetWrapper(InteractionContext ctx)
+        [Command("update")]
+        [Description("Updates the track update information on the sheet.")]
+        [RequireApplicationOwner]
+        public static async Task UpdateSheetWrapper(CommandContext ctx)
         {
-            await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder() { IsEphemeral = Util.CheckEphemeral(ctx) });
+            if (ctx is SlashCommandContext sCtx)
+            {
+                await sCtx.DeferResponseAsync(Util.CheckEphemeral(ctx));
+            }
+            else
+            {
+                await ctx.DeferResponseAsync();
+            }
             await UpdateSheet(ctx);
             var embed = new DiscordEmbedBuilder
             {
@@ -30,10 +42,10 @@ namespace VPBot.Commands.Scheduling
                     Text = $"Server Time: {DateTime.Now}"
                 }
             };
-            await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(embed));
+            await ctx.EditResponseAsync(new DiscordInteractionResponseBuilder().AddEmbed(embed).AsEphemeral(true));
         }
 
-        public static async Task UpdateSheet(InteractionContext ctx)
+        public static async Task UpdateSheet(CommandContext ctx)
         {
             try
             {
@@ -126,7 +138,7 @@ namespace VPBot.Commands.Scheduling
 
                 if (description != "__**Tracks Have Been Updated:**__\n")
                 {
-                    DiscordChannel channel = Bot.Client.GetGuildAsync(GuildID.VP).Result.GetChannel(ChannelID.BOTLOG);
+                    DiscordChannel channel = await Bot.Client.GetGuildAsync(GuildID.VP).Result.GetChannelAsync(ChannelID.BOT_LOGS);
 
                     var embed = new DiscordEmbedBuilder
                     {
@@ -137,7 +149,7 @@ namespace VPBot.Commands.Scheduling
                             Text = $"Server Time: {DateTime.Now}"
                         }
                     };
-                    await channel.SendMessageAsync(new DiscordMessageBuilder().WithContent("<@105742694730457088>").AddEmbed(embed));
+                    await channel.SendMessageAsync(new DiscordMessageBuilder().WithAllowedMention(new UserMention(105742694730457088)).WithContent("<@105742694730457088>").AddEmbed(embed));
                 }
 
                 var today = DateTime.Now;
@@ -158,7 +170,7 @@ namespace VPBot.Commands.Scheduling
                         Text = $"Server Time: {DateTime.Now}"
                     }
                 };
-                if (ctx != null) await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(embed));
+                if (ctx != null) await ctx.EditResponseAsync(new DiscordInteractionResponseBuilder().AddEmbed(embed));
 
                 Console.WriteLine(ex.ToString());
             }

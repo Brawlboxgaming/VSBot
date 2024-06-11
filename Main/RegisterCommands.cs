@@ -4,6 +4,9 @@ using DSharpPlus.SlashCommands;
 using VPBot.Commands.General;
 using VPBot.Commands.Scheduling;
 using VPBot.Commands.Sheet;
+using VPBot.Commands.Testing;
+using VPBot.Commands.TrackManagement;
+using VPBot.Commands.Wiimmfi;
 
 namespace VPBot.Main
 {
@@ -11,18 +14,18 @@ namespace VPBot.Main
     {
         public static void RegisterAllCommands()
         {
-            //General
-            Bot.SlashCommands.RegisterCommands<Help>();
-            Bot.SlashCommands.RegisterCommands<Source>();
-
-            //Scheduling
-            Bot.SlashCommands.RegisterCommands<Update>();
-
-            //Sheet
-            Bot.SlashCommands.RegisterCommands<DownloadTracks>();
+            Bot.Commands.AddCommands(new List<Type>() {
+                typeof(Help),
+                typeof(Source),
+                typeof(Update),
+                typeof(DownloadTracks),
+                typeof(CheckTrackSubmissions),
+                typeof(ClearNewTracks),
+                typeof(RejectTrack)
 #if DEBUG
-            //Bot.SlashCommands.RegisterCommands<Testing>();
+                ,typeof(Testing)
 #endif
+            });
         }
     }
 }
