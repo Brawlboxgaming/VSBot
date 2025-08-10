@@ -1,4 +1,4 @@
-# VPBot
+# VSBot
 
 ## Current List of Commands
 
