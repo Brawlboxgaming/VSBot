@@ -4,7 +4,4 @@
 
 ### Standard Commands
 * /help
-
-### Admin Commands
-* /update
-* /downloadoutdated
+* /source
